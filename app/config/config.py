@@ -8,11 +8,7 @@ FLASK_APP = os.getenv("FLASK_APP")
 FLASK_ENV = os.getenv("FLASK_ENV")
 
 # Database
-MONGODB_URI = (
-    os.getenv("MONGODB_URI_DEV")
-    if FLASK_ENV == "development"
-    else os.getenv("MONGODB_URI_PROD")
-)
+MONGODB_URI = os.getenv("MONGODB_URI")
 
 # Secrets
 SECRET_KEY = os.getenv("SECRET_KEY")
