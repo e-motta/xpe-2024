@@ -5,3 +5,4 @@ venv/
 .venv/
 .space
 Spacefile
+.DS_Store

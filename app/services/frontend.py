@@ -1,6 +1,6 @@
 """
 {
-    "content": {"some message"},
+    "content": "some message",
     "metadata": {
         "user_id": "some id",
     },

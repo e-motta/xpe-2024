@@ -8,7 +8,9 @@ def create_app():
     app.config["SECRET_KEY"] = SECRET_KEY
 
     from app.routes import api_route_blueprint
+    from app.frontend.app import frontend_route_blueprint
 
     app.register_blueprint(api_route_blueprint)
+    app.register_blueprint(frontend_route_blueprint)
 
     return app

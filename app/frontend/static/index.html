@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot de Finanças</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .chat-container {
+        width: 100%;
+        max-width: 500px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        height: 600px;
+      }
+
+      h2 {
+        background-color: #4caf50;
+        color: white;
+        padding: 20px;
+        text-align: center;
+        margin: 0;
+      }
+
+      .messages {
+        flex-grow: 1;
+        padding: 20px;
+        background-color: #ffffff;
+        overflow-y: auto;
+        min-height: 300px;
+        max-height: 500px;
+      }
+
+      .message {
+        margin: 10px 0;
+        padding: 15px;
+        border-radius: 10px;
+        display: inline-block;
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+
+      .user-message {
+        background-color: #d1e7dd;
+        align-self: flex-end;
+        text-align: left;
+        float: right;
+        clear: both;
+      }
+
+      .assistant-message {
+        background-color: #d7d9f8;
+        align-self: flex-start;
+        float: left;
+        clear: both;
+      }
+
+      .formContainer {
+        display: flex;
+        flex-direction: column;
+      }
+
+      form {
+        display: flex;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-top: 1px solid #ddd;
+      }
+
+      input[type="text"] {
+        flex-grow: 1;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        outline: none;
+      }
+
+      input[type="text"]:focus {
+        border-color: #4caf50;
+      }
+
+      input[type="submit"] {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+        font-size: 16px;
+      }
+
+      input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+
+      @media (max-width: 600px) {
+        .chat-container {
+          width: 100%;
+          border-radius: 0;
+          height: 100vh;
+        }
+
+        .messages {
+          padding: 10px;
+        }
+
+        input[type="text"],
+        input[type="submit"] {
+          font-size: 14px;
+        }
+      }
+
+      .loadingContainer {
+        height: 4px;
+      }
+
+      .typing-indicator {
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        height: 4px;
+        width: 100%;
+        background-color: #f0f0f0;
+        position: relative;
+      }
+
+      .typing-indicator .loading-bar {
+        background-color: #3498db;
+        height: 100%;
+        width: 0;
+        position: absolute;
+        animation: loading 1.5s ease-in-out infinite;
+      }
+
+      @keyframes loading {
+        0% {
+          width: 0;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <h2>Chatbot de Finanças</h2>
+      <div class="messages" id="messages"></div>
+      <div class="formContainer">
+        <div class="loadingContainer" id="loadingContainer"></div>
+        <form id="chatForm">
+          <input
+            type="text"
+            id="userMessage"
+            placeholder="Digite uma mensagem..."
+            required
+          />
+          <input type="submit" value="Enviar" autocomplete="off" />
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("chatForm");
+      const messagesDiv = document.getElementById("messages");
+      const loadingContainer = document.getElementById("loadingContainer");
+
+      function generateUUID() {
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            var r = (Math.random() * 16) | 0,
+              v = c == "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }
+        );
+      }
+
+      function appendMessage(content, isUser) {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message");
+        if (isUser) {
+          messageDiv.classList.add("user-message");
+        } else {
+          messageDiv.classList.add("assistant-message");
+        }
+        messageDiv.textContent = content;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+
+      function showLoadingBar() {
+        const loadingDiv = document.createElement("div");
+        loadingDiv.classList.add("typing-indicator");
+        loadingDiv.innerHTML = '<div class="loading-bar"></div>';
+        loadingContainer.appendChild(loadingDiv);
+      }
+
+      function removeLoadingBar() {
+        const loadingDiv = document.querySelector(".typing-indicator");
+        if (loadingDiv) {
+          loadingDiv.remove();
+        }
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const userMessage = document.getElementById("userMessage").value;
+        appendMessage(userMessage, true);
+        document.getElementById("userMessage").value = "";
+        showLoadingBar();
+
+        const response = await fetch("/api/v1/conversation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: userMessage,
+            metadata: {
+              user_id: generateUUID(),
+            },
+          }),
+        });
+
+        const responseData = await response.json();
+        removeLoadingBar();
+        appendMessage(responseData.assistant_content, false);
+      });
+    </script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, make_response, Response
+from flask import Blueprint, request, make_response, Response, jsonify
 
 import logging
 
@@ -41,13 +41,13 @@ def conversation_post() -> Response:
             content=message_content,
         )
 
-        # assistant_content: OpenAIContent = get_assistant_content(
-        #     conversation.limited_messages
-        # )
-        # TODO: Fake message for testing purposes. Remove.
-        assistant_content: OpenAIContent = (
-            "Não se preocupe, estou aqui para te ajudar a entender e gerenciar suas finanças pessoais de forma simples e eficiente. Posso te orientar desde a criação de um orçamento até a organização de investimentos para o futuro."
+        assistant_content: OpenAIContent = get_assistant_content(
+            conversation.limited_messages
         )
+        # TODO: Fake message for testing purposes. Remove.
+        # assistant_content: OpenAIContent = (
+        #     "Não se preocupe, estou aqui para te ajudar a entender e gerenciar suas finanças pessoais de forma simples e eficiente. Posso te orientar desde a criação de um orçamento até a organização de investimentos para o futuro."
+        # )
 
         add_message_to_conversation(
             conversation,
@@ -55,12 +55,18 @@ def conversation_post() -> Response:
             content=assistant_content,
         )
 
-        # send response
+        response_body = {
+            "assistant_content": assistant_content,
+            "metadata": {
+                "user_id": user_id,
+            },
+        }
+        import time
+
+        return jsonify(response_body)
     except Exception as e:
         logger.error(
             f"An error occurred: {str(e)}. Cause: {str(e.__cause__)}",
             exc_info=(FLASK_ENV == "development"),
         )
         return make_response(str(e), 400)
-
-    return make_response("OK", 200)
