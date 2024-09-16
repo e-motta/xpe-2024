@@ -2,7 +2,7 @@ from flask import Blueprint, request, make_response, Response, jsonify
 
 import logging
 
-from .config import OpenAIContent, FLASK_ENV
+from .config import FLASK_ENV
 
 from .services.conversation import (
     get_or_create_conversation,
@@ -41,11 +41,7 @@ def conversation_post() -> Response:
             content=message_content,
         )
 
-        assistant_content: OpenAIContent = get_assistant_content(conversation.messages)
-        # TODO: Fake message for testing purposes. Remove.
-        # assistant_content: OpenAIContent = (
-        #     "Não se preocupe, estou aqui para te ajudar a entender e gerenciar suas finanças pessoais de forma simples e eficiente. Posso te orientar desde a criação de um orçamento até a organização de investimentos para o futuro."
-        # )
+        assistant_content = get_assistant_content(conversation.messages)
 
         add_message_to_conversation(
             conversation,
