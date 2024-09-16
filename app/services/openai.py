@@ -1,5 +1,5 @@
-from typing import Any
 import logging
+from openai.types.chat.chat_completion import ChatCompletion
 
 from ..config import OpenAIContent, OpenAIMessage, OpenAIMessages
 from ..models import Message
@@ -9,23 +9,22 @@ logger = logging.getLogger(__name__)
 
 
 def _convert_message_model_to_openai(message: Message) -> OpenAIMessage:
-    return {
+    return {  # type: ignore
         "role": message.role,
         "content": message.content,
     }
 
 
-def _retrieve_completion_content(response: dict[Any, Any]) -> OpenAIContent:
-    if "choices" in response and len(response["choices"]) > 0:
-        return response["choices"][0]["message"]["content"]
-    raise Exception("No response from OpenAI")
+def _retrieve_completion_content(completion: ChatCompletion) -> OpenAIContent:
+    return completion.choices[0].message.content
 
 
 def _get_completion_content(messages: OpenAIMessages) -> OpenAIContent:
     try:
-        response = generate_chat_completion(messages)
-        return _retrieve_completion_content(response)
+        completion = generate_chat_completion(messages)
+        return _retrieve_completion_content(completion)
     except Exception as e:
+        logger.error(f"OpenAI response error: {str(e)}")
         raise Exception("Error generating completion from OpenAI.") from e
 
 

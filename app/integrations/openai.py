@@ -1,14 +1,16 @@
-from typing import Any
-import openai
+from openai import OpenAI
+from openai.types.chat.chat_completion import ChatCompletion
 
-from ..config import OPENAI_API_KEY, OpenAIMessages
-
-openai.api_key = OPENAI_API_KEY
+from app.config import OpenAIMessages
 
 
-def generate_chat_completion(messages: OpenAIMessages) -> dict[Any, Any]:
-    return openai.ChatCompletion.create(  # type: ignore
+client = OpenAI()
+
+
+def generate_chat_completion(messages: OpenAIMessages) -> ChatCompletion:
+    completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=messages,
-        max_tokens=150,
     )
+
+    return completion

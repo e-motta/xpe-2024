@@ -1,13 +1,8 @@
-from typing import Literal, TypedDict
+from typing import Literal
+from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
 
 
 OpenAIRole = Literal["system", "assistant", "user"]
-OpenAIContent = str
-OpenAIMessage = TypedDict(
-    "OpenAIMessage",
-    {
-        "role": OpenAIRole,
-        "content": OpenAIContent,
-    },
-)
+OpenAIContent = str | None
+OpenAIMessage = ChatCompletionMessageParam
 OpenAIMessages = list[OpenAIMessage]
